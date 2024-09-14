@@ -5,6 +5,18 @@ import pygame
 
 class Window:
     def __init__(self, winSize: tuple[int, int] | str, title = 'Window', backgroundColor: tuple[int, int, int] = (100, 100, 100)) -> None:
+        self.winSize = winSize
+        self.title = title
+        self.fps = 60
+
+        self.backgroundColor = backgroundColor
+
+        self.screen = ...
+        self.clock = ...
+        self.font = ...
+
+        self.running = True
+
         def _initPygame():
             pygame.init()
 
@@ -13,23 +25,15 @@ class Window:
                 self.winSize = (pygame.display.Info().current_w, pygame.display.Info().current_h)
             else:
                 self.screen = pygame.display.set_mode(winSize, vsync = 1)
-                self.winSize = winSize
 
-            self.width = winSize[0]
-            self.height = winSize[1]
-
-            self.backgroundColor = backgroundColor
 
             # pygame.SCALED = True     maybe include
-
-            self.title = title
 
             pygame.display.set_caption(self.title)
             
             self.clock = pygame.time.Clock()
             self.font = pygame.font.SysFont('arial', 50)
 
-            self.running = True
         
         self.initPygame = _initPygame
 
@@ -60,8 +64,7 @@ class Window:
         '''Main loop'''
         while self.running:
             self.handleEvents()
-            print('test')
-            dt = self.clock.tick(60) / 1000.0  # Delta time in seconds (60 fps)
+            dt = self.clock.tick(self.fps) / 1000.0  # Delta time in seconds (60 fps)
 
             self.update(dt)
 
