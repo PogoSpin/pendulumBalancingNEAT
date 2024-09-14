@@ -1,32 +1,37 @@
 from os import environ
-environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'hide'
 
+environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'hide'
 import pygame
 
 class Window:
-    def __init__(self, winSize: tuple[int, int] | str, title = 'Window', backgroundColor: tuple[int, int, int] = (10, 10, 10)) -> None:
-        pygame.init()
+    def __init__(self, winSize: tuple[int, int] | str, title = 'Window', backgroundColor: tuple[int, int, int] = (100, 100, 100)) -> None:
+        def _initPygame():
+            pygame.init()
 
-        if type(winSize) == str:
-            self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN, vsync = 1)
-            self.winSize = (pygame.display.Info().current_w, pygame.display.Info().current_h)
-        else:
-            self.screen = pygame.display.set_mode(winSize, vsync = 1)
-            self.winSize = winSize
+            if type(winSize) == str:
+                self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN, vsync = 1)
+                self.winSize = (pygame.display.Info().current_w, pygame.display.Info().current_h)
+            else:
+                self.screen = pygame.display.set_mode(winSize, vsync = 1)
+                self.winSize = winSize
 
-        self.width = winSize[0]
-        self.height = winSize[1]
+            self.width = winSize[0]
+            self.height = winSize[1]
 
-        # pygame.SCALED = True     maybe include
+            self.backgroundColor = backgroundColor
 
-        self.title = title
+            # pygame.SCALED = True     maybe include
 
-        pygame.display.set_caption(self.title)
+            self.title = title
+
+            pygame.display.set_caption(self.title)
+            
+            self.clock = pygame.time.Clock()
+            self.font = pygame.font.SysFont('arial', 50)
+
+            self.running = True
         
-        self.clock = pygame.time.Clock()
-        self.font = pygame.font.SysFont('arial', 50)
-
-        self.running = True
+        self.initPygame = _initPygame
 
 
     def handleEvents(self):
@@ -50,15 +55,17 @@ class Window:
         pass
 
     def run(self):
+        self.initPygame()
+
         '''Main loop'''
         while self.running:
             self.handleEvents()
-
+            print('test')
             dt = self.clock.tick(60) / 1000.0  # Delta time in seconds (60 fps)
 
             self.update(dt)
 
-            self.screen.fill((0, 0, 0))  # Clear screen with black
+            self.screen.fill(self.backgroundColor)  # Clear screen with black
 
             self.draw()
 
