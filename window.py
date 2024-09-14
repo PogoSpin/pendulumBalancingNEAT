@@ -65,7 +65,6 @@ class Window:
         dt = 1/self.fps
         
         while self.running:
-            print(dt)
             self.handleEvents()
 
             self.update(dt)
