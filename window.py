@@ -7,7 +7,7 @@ class Window:
     def __init__(self, winSize: tuple[int, int] | str, title = 'Window', backgroundColor: tuple[int, int, int] = (100, 100, 100)) -> None:
         self.winSize = winSize
         self.title = title
-        self.fps = 60
+        self.fps = 1
 
         self.backgroundColor = backgroundColor
 
@@ -62,9 +62,11 @@ class Window:
         self.initPygame()
 
         '''Main loop'''
+        dt = 1/self.fps
+        
         while self.running:
+            print(dt)
             self.handleEvents()
-            dt = self.clock.tick(self.fps) / 1000.0  # Delta time in seconds (60 fps)
 
             self.update(dt)
 
@@ -73,6 +75,8 @@ class Window:
             self.draw()
 
             pygame.display.flip()  # Update the display
+            
+            dt = self.clock.tick(self.fps) / 1000.0  # Delta time in seconds (60 fps)
 
         self.quit()
 
