@@ -45,9 +45,15 @@ class Window:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 self.onKeyDown(event.key)
+            elif event.type == pygame.KEYUP:
+                self.onKeyUp(event.key)
 
     def onKeyDown(self, key: pygame.event):
         '''Function to handle keypresses. Override in child classes'''
+        pass
+
+    def onKeyUp(self, key: pygame.event):
+        '''Function to handle keyup events. Override in child classes'''
         pass
 
     def update(self, dt: float):
