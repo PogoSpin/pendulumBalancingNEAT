@@ -17,7 +17,7 @@ class Game(Window):
 
             self.moves = [False, False]
 
-        def update(self, dt):
+        def update(self, timeCoefficient):
             if (self.moves[0] and self.moves[1]) or (not self.moves[0] and not self.moves[1]):
                 self.acceleration = 0
             elif self.moves[0]:
@@ -25,9 +25,11 @@ class Game(Window):
             else:
                 self.acceleration = 2
 
-            self.vel += self.acceleration * dt
-            self.pos.x += self.vel
-            self.vel *= 0.90
+            self.acceleration -= self.vel*0.15
+            
+            self.vel += self.acceleration * timeCoefficient
+
+            self.pos.x += self.vel * timeCoefficient
 
     class Pendulum:
         def __init__(self, winSize: tuple[int, int], mass: int, length: float) -> None:
@@ -39,7 +41,7 @@ class Game(Window):
             self.angularAcceleration = 0
             self.length = length
     
-        def update(self, cartAcceleration, dt):
+        def update(self, cartAcceleration, timeCoefficient):
             g = 3  # gravity
 
             # computes angular accel from grav and cart movement
@@ -49,15 +51,15 @@ class Game(Window):
             self.angularAcceleration -= self.angularVelocity*10/self.length    # drag as a negative acceleration instead of velocity mult
 
             # standard
-            self.angularVelocity += self.angularAcceleration * dt
-            self.angle += self.angularVelocity * dt
+            self.angularVelocity += self.angularAcceleration * timeCoefficient
+            self.angle += self.angularVelocity * timeCoefficient
 
 
     def __init__(self, winSize: tuple[int, int] | str = (1000, 700), title = 'Window', backgroundColor: tuple[int, int, int] = (20, 20, 20)) -> None:
         super().__init__(winSize, title, backgroundColor)
 
         self.fps = 60
-        self.fpsReference = 60
+        self.fpsReference = 60  # IE: targeted fps
 
         self.pos = [0, 0]
 
@@ -83,9 +85,9 @@ class Game(Window):
 
 
     def update(self, dt: float):
-        weightedDt = dt * self.fpsReference
-        self.cart.update(weightedDt)
-        self.pendulum.update(self.cart.acceleration, weightedDt)
+        timeCoefficient = dt * self.fpsReference  # like dt but weighted/normalized with fps reference so it's 1 when running at targeted fps
+        self.cart.update(timeCoefficient)
+        self.pendulum.update(self.cart.acceleration, timeCoefficient)
 
     def draw(self):
         pygame.draw.line(self.screen, (255, 255, 255), (0, self.winSize[1] / 2), (self.winSize[0], self.winSize[1] / 2))
