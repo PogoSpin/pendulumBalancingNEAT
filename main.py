@@ -10,6 +10,8 @@ from window import Window
 
 class Game(Window):
     class Cart:
+        friction = 0.15
+
         def __init__(self, winSize) -> None:
             self.pos = Vector2d(winSize[0] / 2, winSize[1] / 2)
             self.vel = 0
@@ -25,19 +27,19 @@ class Game(Window):
             else:
                 self.acceleration = 2
 
-            self.acceleration -= self.vel*0.15
+            self.acceleration -= self.vel*Game.Cart.friction
             
             self.vel += self.acceleration * timeCoefficient
 
             self.pos.x += self.vel * timeCoefficient
 
     class Pendulum:
+        drag = 2.5
+
         def __init__(self, winSize: tuple[int, int], mass: int, length: float) -> None:
             self.pos = Vector2d(winSize[0] / 2, winSize[1] / 2)
             self.mass = 0.1
             self.length = length
-            
-            self.drag = 2.5
 
             self.angle = pi*1.01
             self.angularVelocity = 0
@@ -50,7 +52,7 @@ class Game(Window):
             #                                     gravity part                                      cart part
             self.angularAcceleration = (-g * sin(self.angle) / self.length)  +  (cos(self.angle) * cartAcceleration / self.length)
 
-            self.angularAcceleration -= self.angularVelocity*self.drag/self.length    # drag as a negative acceleration instead of velocity mult
+            self.angularAcceleration -= self.angularVelocity*Game.Pendulum.drag/self.length    # drag as a negative acceleration instead of velocity mult
 
             # standard
             self.angularVelocity += self.angularAcceleration * timeCoefficient
