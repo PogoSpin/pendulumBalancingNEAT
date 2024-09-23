@@ -17,12 +17,12 @@ class Game(Window):
             self.vel = 0
             self.acceleration = 0
 
-            self.moves = [False, False]
+            self.inputs = [False, False]
 
         def update(self, timeCoefficient):
-            if (self.moves[0] and self.moves[1]) or (not self.moves[0] and not self.moves[1]):
+            if (self.inputs[0] and self.inputs[1]) or (not self.inputs[0] and not self.inputs[1]):
                 self.acceleration = 0
-            elif self.moves[0]:
+            elif self.inputs[0]:
                 self.acceleration = -2
             else:
                 self.acceleration = 2
@@ -75,17 +75,17 @@ class Game(Window):
             self.running = False
 
         if key == pygame.K_LEFT:
-            self.cart.moves[0] = True
+            self.cart.inputs[0] = True
 
         elif key == pygame.K_RIGHT:
-            self.cart.moves[1] = True
+            self.cart.inputs[1] = True
 
     def onKeyUp(self, key: pygame.event):
         if key == pygame.K_LEFT:
-            self.cart.moves[0] = False
+            self.cart.inputs[0] = False
 
         elif key == pygame.K_RIGHT:
-            self.cart.moves[1] = False
+            self.cart.inputs[1] = False
 
 
     def update(self, dt: float):
