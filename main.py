@@ -34,27 +34,30 @@ class Game(Window):
             self.pos = Vector2d(winSize[0] / 2, winSize[1] / 2)
             self.mass = 0.1
 
-            self.angle = pi * 0.99
+            self.angle = pi*1.01
             self.angularVelocity = 0
             self.angularAcceleration = 0
             self.length = length
     
         def update(self, cartAcceleration, dt):
             g = 3  # gravity
-            
-            # non-newtonion try:  self.angularAcceleration = sin(pi/2 - pi/4 - self.angle) * g
-            self.angularAcceleration = -g * sin(self.angle) / self.length
 
+            # computes angular accel from grav and cart movement
+            #                                     gravity part                                      cart part
+            self.angularAcceleration = (-g * sin(self.angle) / self.length)  +  (cos(self.angle) * cartAcceleration / self.length)
+
+            self.angularAcceleration -= self.angularVelocity*10/self.length    # drag as a negative acceleration instead of velocity mult
+
+            # standard
             self.angularVelocity += self.angularAcceleration * dt
-            self.angle += self.angularVelocity
-            self.angularVelocity *= 0.98
+            self.angle += self.angularVelocity * dt
 
 
     def __init__(self, winSize: tuple[int, int] | str = (1000, 700), title = 'Window', backgroundColor: tuple[int, int, int] = (20, 20, 20)) -> None:
         super().__init__(winSize, title, backgroundColor)
 
         self.fps = 60
-        self.fpsReference = 36
+        self.fpsReference = 60
 
         self.pos = [0, 0]
 
