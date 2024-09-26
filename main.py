@@ -47,6 +47,8 @@ class Game(Window):
 
     class Pendulum:
         drag = 2.5
+        gravity = 0.1
+
 
         def __init__(self, winSize: tuple[int, int], mass: int, length: float) -> None:
             self.pos = Vector2d(winSize[0] / 2, winSize[1] / 2)
@@ -58,11 +60,9 @@ class Game(Window):
             self.angularAcceleration = 0
     
         def update(self, cartAcceleration, timeCoefficient):
-            g = 3  # gravity
-
             # computes angular accel from grav and cart movement
             #                                     gravity part                                      cart part
-            self.angularAcceleration = (-g * sin(self.angle) / self.length)  +  (cos(self.angle) * cartAcceleration / self.length)
+            self.angularAcceleration = (-Game.Pendulum.gravity * sin(self.angle) / self.length)  +  (cos(self.angle) * cartAcceleration / self.length)
 
             self.angularAcceleration -= self.angularVelocity*Game.Pendulum.drag/self.length    # drag as a negative acceleration instead of velocity mult
 
@@ -127,8 +127,12 @@ class Game(Window):
             agent.cart.update(timeCoefficient)
             agent.pendulum.update(agent.cart.acceleration, timeCoefficient)
 
+            
             if agent.pendulum.angle >= pi/2 and agent.pendulum.angle <= pi + pi/2:
-                self.ge[id].fitness += 0.1
+                if agent.pendulum.angle >= 2.793 and agent.pendulum.angle <= 3.491:
+                    self.ge[id].fitness += 0.1 / (abs(agent.pendulum.angularVelocity) + 0.1)
+                else:
+                    self.ge[id].fitness += 0.001 / (abs(agent.pendulum.angularVelocity) + 0.1)
 
             
 
@@ -151,7 +155,7 @@ class Game(Window):
             
             dt = self.clock.tick(self.fps) / 1000.0  # Delta time in seconds (60 fps)
             frame += 1
-            if frame > 300:
+            if frame > 500:
                 self.running = False
 
 
@@ -165,6 +169,10 @@ class Game(Window):
 a = Game()
 
 def eval_genomes(genomes, config):
+    if a.Pendulum.gravity < 3:
+        a.Pendulum.gravity += 0.01
+    print(a.Pendulum.gravity)
+    
     nets = []
     ge = []
     a.create(genomes, nets, ge, config)
