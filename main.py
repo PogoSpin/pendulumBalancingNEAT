@@ -48,6 +48,7 @@ class Game(Window):
     class Pendulum:
         drag = 2.5
         gravity = 0.1
+        # gravity = 3
 
 
         def __init__(self, winSize: tuple[int, int], mass: int, length: float) -> None:
@@ -77,6 +78,9 @@ class Game(Window):
             self.pendulum = Game.Pendulum(winSize, 10, 100)
             self.cart = Game.Cart(winSize)
 
+            self.streak = 1
+            self.inStreak = False
+
 
     def __init__(self, winSize: tuple[int, int] | str = (1000, 700), title = 'Window', backgroundColor: tuple[int, int, int] = (20, 20, 20)) -> None:
         super().__init__(winSize, title, backgroundColor)
@@ -86,7 +90,7 @@ class Game(Window):
 
         self.agents = []
 
-        self.initPygame()
+        # self.initPygame()
 
     def create(self, genomes, nets, ge, config):
         self.genomes = genomes
@@ -129,10 +133,20 @@ class Game(Window):
 
             
             if agent.pendulum.angle >= pi/2 and agent.pendulum.angle <= pi + pi/2:
-                if agent.pendulum.angle >= 2.793 and agent.pendulum.angle <= 3.491:
-                    self.ge[id].fitness += 0.1 / (abs(agent.pendulum.angularVelocity) + 0.1)
-                else:
-                    self.ge[id].fitness += 0.001 / (abs(agent.pendulum.angularVelocity) + 0.1)
+                agent.inStreak = True
+                agent.streak *= 1.014
+            else:
+                if agent.inStreak:
+                    self.ge[id].fitness += agent.streak
+                    agent.streak = 1
+                    agent.inStreak = False
+                
+
+
+                # if agent.pendulum.angle >= 2.793 and agent.pendulum.angle <= 3.491:
+                #     self.ge[id].fitness += 0.1 / (abs(agent.pendulum.angularVelocity) + 0.1)
+                # else:
+                #     self.ge[id].fitness += 0.001 / (abs(agent.pendulum.angularVelocity) + 0.1)
 
             
 
@@ -143,34 +157,53 @@ class Game(Window):
         frame = 0
 
         while self.running:
-            self.handleEvents()
+            # self.handleEvents()
 
             self.update(dt)
 
-            self.screen.fill(self.backgroundColor)  # Clear screen with black
+            # self.screen.fill(self.backgroundColor)  # Clear screen with black
 
-            self.draw()
+            # self.draw()
 
-            pygame.display.flip()  # Update the display
+            # pygame.display.flip()  # Update the display
             
-            dt = self.clock.tick(self.fps) / 1000.0  # Delta time in seconds (60 fps)
+            # dt = self.clock.tick(self.fps) / 1000.0  # Delta time in seconds (60 fps)
             frame += 1
             if frame > 500:
                 self.running = False
 
+        highestFitness = -1
+
+        for id, agent in enumerate(self.agents):
+            if agent.inStreak:
+                self.ge[id].fitness += agent.streak
+                agent.streak = 1
+                agent.inStreak = False
+
+            if self.ge[id].fitness > highestFitness:
+                highestFitness = self.ge[id].fitness
+        print(highestFitness)
+        if highestFitness >= 1000:
+            if self.Pendulum.gravity < 3:
+                self.Pendulum.gravity += 0.01
+
+
 
     def draw(self):
-        pygame.draw.line(self.screen, (255, 255, 255), (0, self.winSize[1] / 2), (self.winSize[0], self.winSize[1] / 2))
+        pass
+        # pygame.draw.line(self.screen, (255, 255, 255), (0, self.winSize[1] / 2), (self.winSize[0], self.winSize[1] / 2))
         
-        for agent in self.agents:
-            pygame.draw.rect(self.screen, (200, 0, 0), pygame.rect.Rect(agent.cart.pos.x-25, agent.cart.pos.y-12.5, 50, 25))
-            pygame.draw.line(self.screen, (255, 255, 255), (agent.cart.pos.x, agent.cart.pos.y), (agent.cart.pos.x + cos(agent.pendulum.angle + pi/2)*agent.pendulum.length, agent.cart.pos.y + sin(agent.pendulum.angle + pi/2)*agent.pendulum.length), 3)
+        # for i, agent in enumerate(self.agents):
+        #     if i == 0:
+        #         pygame.draw.rect(self.screen, (0, 255, 0), pygame.rect.Rect(agent.cart.pos.x-25, agent.cart.pos.y-12.5, 50, 25))
+        #     else:
+        #         pygame.draw.rect(self.screen, (200, 0, 0), pygame.rect.Rect(agent.cart.pos.x-25, agent.cart.pos.y-12.5, 50, 25))
+
+        #     pygame.draw.line(self.screen, (255, 255, 255), (agent.cart.pos.x, agent.cart.pos.y), (agent.cart.pos.x + cos(agent.pendulum.angle + pi/2)*agent.pendulum.length, agent.cart.pos.y + sin(agent.pendulum.angle + pi/2)*agent.pendulum.length), 3)
     
 a = Game()
 
 def eval_genomes(genomes, config):
-    if a.Pendulum.gravity < 3:
-        a.Pendulum.gravity += 0.01
     print(a.Pendulum.gravity)
     
     nets = []
@@ -191,7 +224,7 @@ def run_neat(config):
     p.add_reporter(stats)
     # p.add_reporter(neat.Checkpointer(1))
 
-    winner = p.run(eval_genomes, 500)
+    winner = p.run(eval_genomes, 5000)
     with open("best.pickle", "wb") as f:
         pickle.dump(winner, f)
         f.close()
