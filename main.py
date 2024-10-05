@@ -193,7 +193,7 @@ class Game(Window):
 
             pygame.draw.line(self.screen, (255, 255, 255), (agent.cart.pos.x, agent.cart.pos.y), (agent.cart.pos.x + cos(agent.pendulum.angle + pi/2)*agent.pendulum.length, agent.cart.pos.y + sin(agent.pendulum.angle + pi/2)*agent.pendulum.length), 3)
     
-a = Game(render = True)
+a = Game(render = False)
 
 def eval_genomes(genomes, config):
     nets = []
@@ -214,7 +214,7 @@ def run_neat(config):
     p.add_reporter(stats)
     # p.add_reporter(neat.Checkpointer(1))
 
-    winner = p.run(eval_genomes, 5000)
+    winner = p.run(eval_genomes, 100)
     with open("best.pickle", "wb") as f:
         pickle.dump(winner, f)
         f.close()
