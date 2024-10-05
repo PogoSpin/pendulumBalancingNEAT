@@ -7,7 +7,7 @@ class Window:
     def __init__(self, winSize: tuple[int, int] | str, title = 'Window', backgroundColor: tuple[int, int, int] = (100, 100, 100)) -> None:
         self.winSize = winSize
         self.title = title
-        self.fps = 1
+        self.fps = 60
 
         self.backgroundColor = backgroundColor
 
