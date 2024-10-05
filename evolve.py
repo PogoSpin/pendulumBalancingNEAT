@@ -3,6 +3,7 @@ import neat
 from os import environ, path
 from vector import Vector2d
 from math import sin, cos, pi
+from random import random
 
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'hide'
 import pygame
@@ -51,12 +52,13 @@ class Game(Window):
         # gravity = 3
 
 
-        def __init__(self, winSize: tuple[int, int], mass: int, length: float) -> None:
+        def __init__(self, winSize: tuple[int, int], angle, length: float) -> None:
             self.pos = Vector2d(winSize[0] / 2, winSize[1] / 2)
             self.mass = 0.1
             self.length = length
 
-            self.angle = pi+0.1
+            self.angle = angle
+            
             self.angularVelocity = 0
             self.angularAcceleration = 0
     
@@ -74,8 +76,8 @@ class Game(Window):
             self.angle = self.angle % (2 * pi)
 
     class Agent:
-        def __init__(self, winSize) -> None:
-            self.pendulum = Game.Pendulum(winSize, 10, 100)
+        def __init__(self, winSize, angle) -> None:
+            self.pendulum = Game.Pendulum(winSize, angle, 100)
             self.cart = Game.Cart(winSize)
 
             self.streak = 1
@@ -89,23 +91,27 @@ class Game(Window):
         self.fpsReference = 60  # IE: targeted fps
 
         self.agents = []
+        self.bestGenome = None
 
         # self.initPygame()
 
-    def create(self, genomes, nets, ge, config):
+    def create(self, genomes, config):
         self.genomes = genomes
-        self.nets = nets
         self.config = config
-        self.ge = ge
+
+        self.nets = []
+        self.ge = []
 
         self.agents.clear()
+
+        angle = random()*pi + pi/2
 
         for _, g in self.genomes:
             g.fitness = 0
             net = neat.nn.FeedForwardNetwork.create(g, self.config)
             self.nets.append(net)
 
-            self.agents.append(Game.Agent(self.winSize))
+            self.agents.append(Game.Agent(self.winSize, angle))
 
             self.ge.append(g)
 
@@ -182,34 +188,48 @@ class Game(Window):
 
             if self.ge[id].fitness > highestFitness:
                 highestFitness = self.ge[id].fitness
-        print(highestFitness)
-        if highestFitness >= 1000:
+                self.bestGenome = self.ge[id]
+
+        if highestFitness >= 800:
             if self.Pendulum.gravity < 3:
                 self.Pendulum.gravity += 0.01
+                print('\nINCREASING GRAVITY\n')
+                sleep(2)
 
 
 
     def draw(self):
-        pass
-        # pygame.draw.line(self.screen, (255, 255, 255), (0, self.winSize[1] / 2), (self.winSize[0], self.winSize[1] / 2))
+        pygame.draw.line(self.screen, (255, 255, 255), (0, self.winSize[1] / 2), (self.winSize[0], self.winSize[1] / 2))
         
-        # for i, agent in enumerate(self.agents):
-        #     if i == 0:
-        #         pygame.draw.rect(self.screen, (0, 255, 0), pygame.rect.Rect(agent.cart.pos.x-25, agent.cart.pos.y-12.5, 50, 25))
-        #     else:
-        #         pygame.draw.rect(self.screen, (200, 0, 0), pygame.rect.Rect(agent.cart.pos.x-25, agent.cart.pos.y-12.5, 50, 25))
+        for i, agent in enumerate(self.agents):
+            if i == 0:
+                pygame.draw.rect(self.screen, (0, 255, 0), pygame.rect.Rect(agent.cart.pos.x-25, agent.cart.pos.y-12.5, 50, 25))
+            else:
+                pygame.draw.rect(self.screen, (200, 0, 0), pygame.rect.Rect(agent.cart.pos.x-25, agent.cart.pos.y-12.5, 50, 25))
 
-        #     pygame.draw.line(self.screen, (255, 255, 255), (agent.cart.pos.x, agent.cart.pos.y), (agent.cart.pos.x + cos(agent.pendulum.angle + pi/2)*agent.pendulum.length, agent.cart.pos.y + sin(agent.pendulum.angle + pi/2)*agent.pendulum.length), 3)
+            pygame.draw.line(self.screen, (255, 255, 255), (agent.cart.pos.x, agent.cart.pos.y), (agent.cart.pos.x + cos(agent.pendulum.angle + pi/2)*agent.pendulum.length, agent.cart.pos.y + sin(agent.pendulum.angle + pi/2)*agent.pendulum.length), 3)
     
 a = Game()
 
 def eval_genomes(genomes, config):
     print(a.Pendulum.gravity)
     
-    nets = []
-    ge = []
-    a.create(genomes, nets, ge, config)
+    a.create(genomes, config)
     a.run()
+
+def use_genome(config):
+    import pickle
+
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                            neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                            config_path)
+    
+    with open('best.pickle', "rb") as f:
+        genome = pickle.load(f)
+    
+    genomes = [(1, genome)]
+
+    eval_genomes(genomes, config)
 
 def run_neat(config):
     import pickle
@@ -224,10 +244,20 @@ def run_neat(config):
     p.add_reporter(stats)
     # p.add_reporter(neat.Checkpointer(1))
 
-    winner = p.run(eval_genomes, 5000)
-    with open("best.pickle", "wb") as f:
-        pickle.dump(winner, f)
-        f.close()
+    try:
+        winner = p.run(eval_genomes, 5000)
+
+        with open("best.pickle", "wb") as f:
+            pickle.dump(winner, f)
+            f.close()
+    except KeyboardInterrupt:
+        print('Stopped by user, saving best genome.\n')
+        print(a.bestGenome)
+
+        with open("best.pickle", "wb") as f:
+            pickle.dump(a.bestGenome, f)
+            f.close()
+
 
 if __name__ == '__main__':
     local_dir = path.dirname(__file__)
@@ -235,3 +265,4 @@ if __name__ == '__main__':
 
 
     run_neat(config_path)
+    # use_genome(config_path)
