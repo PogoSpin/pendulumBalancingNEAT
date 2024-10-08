@@ -1,9 +1,10 @@
-from time import sleep
-import neat
+from time import time
+import importlib
 from os import environ, path
 from vector import Vector2d
 from math import sin, cos, pi
 from random import random
+import neat
 
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'hide'
 import pygame
@@ -48,7 +49,7 @@ class Game(Window):
 
     class Pendulum:
         drag = 2.5
-        gravity = 0.1
+        gravity = 0.05
 
         def __init__(self, winSize: tuple[int, int], length: float, angle: float) -> None:
             self.pos = Vector2d(winSize[0] / 2, winSize[1] / 2)
@@ -88,6 +89,8 @@ class Game(Window):
         self.fpsReference = 60  # IE: targeted fps
 
         self.render = render
+        self.dir = 0.05
+        self.passedLast = False
 
         self.agents = []
 
@@ -102,23 +105,20 @@ class Game(Window):
 
         self.agents.clear()
 
-        angle = pi
-        if random() > 0.5:
-            angle += 0.05
-        else:
-            angle -= 0.05
-
         for _, g in self.genomes:
             g.fitness = 0
             net = neat.nn.FeedForwardNetwork.create(g, self.config)
             self.nets.append(net)
 
-            self.agents.append(Game.Agent(self.winSize, angle))
+            self.agents.append(Game.Agent(self.winSize, pi + self.dir))
 
             self.ge.append(g)
 
+        self.dir *= -1
+
     def update(self, dt: float):
         timeCoefficient = dt * self.fpsReference  # like dt but weighted/normalized with fps reference so it's 1 when running at targeted fps
+
         for id, agent in enumerate(self.agents):
             output = self.nets[id].activate([agent.pendulum.angle, agent.pendulum.angularVelocity, agent.cart.pos.x])
 
@@ -144,17 +144,14 @@ class Game(Window):
                     self.ge[id].fitness += agent.streak
                     agent.streak = 1
                     agent.inStreak = False
-            
+        
 
-    def run(self):
+    def run(self, o):
         '''Main loop'''
         dt = 1/self.fps
         self.running = True
         frame = 0
-
         while self.running:
-
-
             if self.render:
                 self.handleEvents()
 
@@ -170,16 +167,32 @@ class Game(Window):
 
             else:
                 self.update(dt)
-
             frame += 1
             if frame > 500:
                 self.running = False
+        
+        highestFitness = -1
 
         for id, agent in enumerate(self.agents):
             if agent.inStreak:
                 self.ge[id].fitness += agent.streak
                 agent.streak = 1
                 agent.inStreak = False
+            
+            if self.ge[id].fitness > highestFitness:
+                highestFitness = self.ge[id].fitness
+                self.bestGenome = self.ge[id]
+
+        if self.passedLast:
+            if highestFitness >= 800:
+                print(f'{o}   {round(highestFitness)}   {self.passedLast}')
+                raise StopIteration()
+            else:
+                self.passedLast = False
+        else:
+            if highestFitness >= 800:
+                self.passedLast = True
+        print(f'{o}   {round(highestFitness)}   {self.passedLast}')
 
 
     def draw(self):
@@ -193,35 +206,46 @@ class Game(Window):
 
             pygame.draw.line(self.screen, (255, 255, 255), (agent.cart.pos.x, agent.cart.pos.y), (agent.cart.pos.x + cos(agent.pendulum.angle + pi/2)*agent.pendulum.length, agent.cart.pos.y + sin(agent.pendulum.angle + pi/2)*agent.pendulum.length), 3)
     
-a = Game(render = False)
 
 def eval_genomes(genomes, config):
+    global o, a
     nets = []
     ge = []
     a.create(genomes, nets, ge, config)
-    a.run()
+    a.run(o)
+    o += 1
 
-def run_neat(config):
+def run_neat(config_path):
     import pickle
+
     # p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-85')
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                             neat.DefaultSpeciesSet, neat.DefaultStagnation,
                             config_path)
-
+    
+    global a
+    a = Game(render = False)
     p = neat.Population(config)
-    p.add_reporter(neat.StdOutReporter(True))
-    stats = neat.StatisticsReporter()
-    p.add_reporter(stats)
-    # p.add_reporter(neat.Checkpointer(1))
+    # p.add_reporter(neat.StdOutReporter(True)) 
 
-    winner = p.run(eval_genomes, 100)
-    with open("best.pickle", "wb") as f:
-        pickle.dump(winner, f)
-        f.close()
+    global o
+    o = 1
+
+    try:
+        p.run(eval_genomes, 50)
+        print('never found after 50 generations\n\n')
+        return 'None'
+    except StopIteration:
+        print(f'Reached goal after {o} generations.\n\n')
+        return o
+    
+    # with open("best.pickle", "wb") as f:
+    #     pickle.dump(winner, f)
+    #     f.close()
 
 if __name__ == '__main__':
+    import pyperclip
     local_dir = path.dirname(__file__)
     config_path = path.join(local_dir, 'config.txt')
 
-
-    run_neat(config_path)
+    pyperclip.copy(run_neat(config_path))
