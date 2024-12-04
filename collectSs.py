@@ -2,20 +2,6 @@ import pyautogui as pa
 import pyperclip
 from time import sleep
 
-def updateCompatibilityThreshold(newValue):
-    '''
-    This function updates the compatibility_threshold in the config.txt file.
-    '''
-    with open('config.txt', 'r') as file:
-        lines = file.readlines()
-
-    with open('config.txt', 'w') as file:
-        for line in lines:
-            if 'compatibility_threshold' in line:
-                file.write(f'compatibility_threshold = {newValue}\n')
-            else:
-                file.write(line)
-
 def updateMaxStagnation(newValue):
     '''
     This function updates the max_stagnation in the config.txt file.
@@ -51,10 +37,10 @@ def main():
 
     sleep(2)
 
-    ct = 0.5
+    Ss = 3
 
-    while ct < 10:
-        updateCompatibilityThreshold(ct)
+    while Ss < 31:
+        updateMaxStagnation(Ss)
 
         count = 0
         roundData = []
@@ -69,13 +55,13 @@ def main():
             else:
                 count += 1
 
-        print(f'\nFor CT {ct}:\n{roundData}')
+        print(f'\nFor Ss {Ss}:\n{roundData}')
         if count > sampleAmount / 2:
             print('FAILED')
         else:
             print(f'Average of {total/n}')
 
-        ct += 0.2
+        Ss += 1
     
 
 if __name__ == '__main__':
