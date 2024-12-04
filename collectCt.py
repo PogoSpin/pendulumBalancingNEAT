@@ -16,20 +16,6 @@ def updateCompatibilityThreshold(newValue):
             else:
                 file.write(line)
 
-def updateMaxStagnation(newValue):
-    '''
-    This function updates the max_stagnation in the config.txt file.
-    '''
-    with open('config.txt', 'r') as file:
-        lines = file.readlines()
-
-    with open('config.txt', 'w') as file:
-        for line in lines:
-            if 'max_stagnation' in line:
-                file.write(f'max_stagnation = {newValue}\n')
-            else:
-                file.write(line)
-
 
 def getResult():
     pyperclip.copy('nah')
