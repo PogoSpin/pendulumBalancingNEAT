@@ -109,3 +109,83 @@ Average of 13.0
 For Ss 30:
 [None, 4, None, 38, 26, 11, 19, 6, 3, None]
 Average of 15.285714285714286
+
+For Ss 31:
+[6, 11, 5, 33, 17, 3, 37, 17, 10, None]
+Average of 15.444444444444445
+
+For Ss 32:
+[14, 10, 21, 31, None, 5, 33, 16, 12, 18]
+Average of 17.77777777777778
+
+For Ss 33:
+[24, 17, 7, None, None, None, 19, 8, 9, 37]
+Average of 17.285714285714285
+
+For Ss 34:
+[20, None, None, 8, None, 10, 12, 36, 26, 23]
+Average of 19.285714285714285
+
+For Ss 35:
+[14, None, 9, 24, None, None, 11, 17, None, 8]
+Average of 13.833333333333334
+
+For Ss 36:
+[13, 26, 16, 25, 14, 24, 32, 11, None, 5]
+Average of 18.444444444444443
+
+For Ss 37:
+[None, None, None, 28, 4, 30, 5, 20, 8, 5]
+Average of 14.285714285714286
+
+For Ss 38:
+[None, None, 47, None, 10, None, 16, 8, 19, None]
+Average of 20.0
+
+For Ss 39:
+[23, 33, 15, None, 21, 20, 46, 20, 31, 17]
+Average of 25.11111111111111
+
+For Ss 40:
+[12, 14, 25, 15, 10, 27, 8, 6, 41, 6]
+Average of 16.4
+
+For Ss 41:
+[27, None, 10, 7, None, 9, 11, 15, None, 9]
+Average of 12.571428571428571
+
+For Ss 42:
+[8, None, 6, 28, None, 8, 3, 8, 24, None]
+Average of 12.142857142857142
+
+For Ss 43:
+[31, 15, 31, 6, 11, None, 5, None, 8, 11]
+Average of 14.75
+
+For Ss 44:
+[36, 35, 4, 19, 5, 41, 35, 25, 15, None]
+Average of 23.88888888888889
+
+For Ss 45:
+[38, None, 9, 5, 13, 27, 12, 27, 23, 7]
+Average of 17.88888888888889
+
+For Ss 46:
+[31, 17, 17, 11, 6, 11, 15, 10, 37, 14]
+Average of 16.9
+
+For Ss 47:
+[38, 5, 9, 25, 35, None, 11, 9, 45, None]
+Average of 22.125
+
+For Ss 48:
+[10, None, 15, 14, None, 42, 4, None, None, None]
+Average of 17.0
+
+For Ss 49:
+[None, None, 8, 18, 21, 37, 6, 9, None, 12]
+Average of 15.857142857142858
+
+For Ss 50:
+[26, 17, None, 29, 12, None, 22, 12, 15, None]
+Average of 19.0
